@@ -2,7 +2,7 @@
 
 基于 **STM32F103** 的「双转盘」指示器固件：接收航向数据后，用**整数盘 + 小数盘**两路步进电机分别指示航向的整数位与小数位，并配 TM1637 数码管显示。
 
-> 使用 STM32CubeMX + FreeRTOS（CMSIS-OS2），Keil MDK-ARM 工程。
+> FreeRTOS（CMSIS-OS2）+ STM32 HAL 库，Keil MDK-ARM 工程。
 
 ## ✨ 功能特性
 
@@ -26,11 +26,12 @@
 | 显示 | TM1637（PB6 CLK / PB7 DIO） |
 | 背光 | TIM1 PWM 5 档（0 / 250 / 500 / 750 / 999） |
 
-引脚定义见根目录 `mAmeter.ioc`。
+引脚定义见 `Core/Src` 中各外设初始化代码。
 
 ## 🧱 软件结构
 
-- **框架**：STM32CubeMX 生成骨架 + FreeRTOS（CMSIS-OS2）
+- **框架**：FreeRTOS（CMSIS-OS2）+ STM32 HAL 库
+- **说明**：项目骨架早期由 CubeMX 生成，现已独立维护，**不再依赖 CubeMX**（工程里不含 `.ioc`）
 - **IDE**：Keil MDK-ARM —— 工程文件 `MDK-ARM/mAmeter.uvprojx`
 - **源码编码**：GBK
 - **任务划分**：
@@ -45,8 +46,7 @@
 Core/          用户代码（main.c / freertos.c / modules/…）
 Drivers/       STM32 HAL 驱动 + CMSIS
 Middlewares/   FreeRTOS
-MDK-ARM/       Keil MDK 工程
-mAmeter.ioc    CubeMX 工程文件
+MDK-ARM/       Keil MDK 工程（mAmeter.uvprojx）
 TMC2225.pdf    TMC2225 驱动芯片数据手册
 ```
 

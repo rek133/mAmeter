@@ -131,6 +131,9 @@ static void zeroingComplete(void)
     menu_ctrl.current_status = MENU_IDLE;
     sysState.is_in_menu = 0;
     sysState.is_in_zeroing = 0;
+    /* 调零后让显示值/目标与逻辑位置同步, 防止数码管滞留旧值、目标锁死在旧位置 */
+    sysState.displayedDutyCycle = sysState.currentDutyCycle;
+    sysState.targetDutyCycle    = sysState.currentDutyCycle;
     delay_us(2000);
     osDelay(1000);
     if (sensorTaskHandle != NULL) osThreadResume(sensorTaskHandle);

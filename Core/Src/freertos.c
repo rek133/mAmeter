@@ -102,9 +102,11 @@ void Task_Sensor(void *argument)
             avgRot = sum / validCount;
             filteredValue = roundf(avgRot * 10.0f);
 
-            /* 与显示值偏差>=0.5度(5x0.1度)才更新目标, 抑制抖动 */
-            if (fabsf(filteredValue - sysState.displayedDutyCycle) >= 5) {
-                sysState.targetDutyCycle = filteredValue;
+            /* 与上一个目标比较(而非显示值), 做360度环绕差; 变化>=0.5度才更新目标, 抑制抖动 */
+            {
+                float diff = fabsf(filteredValue - sysState.targetDutyCycle);
+                if (diff > 1800.0f) diff = 3600.0f - diff;
+                if (diff >= 5.0f) sysState.targetDutyCycle = filteredValue;
             }
             sysState.uartDataReady = 0;   /* 消费掉本帧, 防止同一帧被反复处理 */
             sysState.noDataFlag = 0;

@@ -81,7 +81,9 @@ void moveMotorTask(void)
     targetDirection = (dutyDifference > 0) ? 1 : -1;
     targetRemainingSteps = abs((int32_t)(dutyDifference * 8));
 
-    if (sysState.isMotorMoving == 0) {
+    /* isMotorMoving 残留(换向减速未跑完就把剩余步数走到0)时也要重装,
+       否则 isMotorMoving 永远卡1、fractionRemainingSteps 永远0 -> 永久停步 */
+    if (sysState.isMotorMoving == 0 || sysState.fractionRemainingSteps <= 0) {
         sysState.fractionRemainingSteps = targetRemainingSteps;
     }
 

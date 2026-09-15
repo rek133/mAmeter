@@ -95,8 +95,10 @@ void moveMotorTask(void)
     }
 
     /* ===== 3. 统一步进执行(换向流程与正常加减速二选一) ===== */
-    if (sysState.fractionRemainingSteps > 0 &&
+    if ((sysState.isMotorMoving || sysState.fractionRemainingSteps > 0) &&
         TIME_DIFF(currentTime, sysState.lastFractionStepTime) >= delay_ms) {
+
+        uint8_t reversing = 0;   /* 1 = 换向减速滑行中(此步不消耗目标剩余步数, 防死锁) */
 
         /* ---- 3.1 换向流程: 先减速停稳, 再换向并装载新目标 ---- */
         if (sysState.isMotorMoving) {
@@ -105,6 +107,7 @@ void moveMotorTask(void)
                 if (sysState.fractionStepDelay > SLOW_DELAY) {
                     sysState.fractionStepDelay = SLOW_DELAY;
                 }
+                reversing = 1;   /* 减速滑行阶段: 不扣剩余步数 */
             } else {
                 sysState.isMotorMoving = 0;                     /* 退出换向流程 */
                 sysState.fractionDirection = targetDirection;   /* 切换到新方向 */
@@ -151,7 +154,9 @@ void moveMotorTask(void)
 
         /* 执行一步 */
         stepFractionMotor();
-        sysState.fractionRemainingSteps--;
+        if (!reversing) {
+            sysState.fractionRemainingSteps--;
+        }
         sysState.lastFractionStepTime = currentTime;
 
         /* 位置累计(0.125/步, 0~3600循环) */
